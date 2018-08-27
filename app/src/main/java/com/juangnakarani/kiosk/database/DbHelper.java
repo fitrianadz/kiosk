@@ -13,12 +13,14 @@ import com.juangnakarani.kiosk.model.TransactionDetail;
 import com.juangnakarani.kiosk.model.TransactionHeader;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class DbHelper extends SQLiteOpenHelper {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "Kiosk.db";
 
     private static final String SQL_CREATE_PRODUCT =
@@ -49,9 +51,11 @@ public class DbHelper extends SQLiteOpenHelper {
 
     private static final String SQL_CREATE_TRANSACTION_HEADER = "CREATE TABLE " + DbContract.TransactionHeaderEntity.TABLE_NAME + " (" +
             DbContract.TransactionHeaderEntity.COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-            DbContract.TransactionHeaderEntity.COL_DATETIME + " TEXT," +
+            DbContract.TransactionHeaderEntity.COL_DATETIME + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
             DbContract.TransactionHeaderEntity.COL_TOTAL + " INTEGER," +
             DbContract.TransactionHeaderEntity.COL_RECEIVED + " INTEGER)";
+
+    private static final String SQL_DROP_TRANSACTION_HEADER = "DROP TABLE IF EXISTS " + DbContract.TransactionHeaderEntity.TABLE_NAME;
 
     private static final String SQL_CREATE_TRANSACTION_DETAIL = "CREATE TABLE " + DbContract.TransactionDetailEntity.TABLE_NAME + " (" +
             DbContract.TransactionDetailEntity.COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -60,6 +64,8 @@ public class DbHelper extends SQLiteOpenHelper {
             DbContract.TransactionDetailEntity.COL_CATEGORY_ID + " INTEGER," +
             DbContract.TransactionDetailEntity.COL_ORDERED + " INTEGER," +
             DbContract.TransactionDetailEntity.COL_PRICE + " INTEGER)";
+
+    private static final String SQL_DROP_TRANSACTION_DETAIL = "DROP TABLE IF EXISTS " + DbContract.TransactionDetailEntity.TABLE_NAME;
 
     public DbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -87,6 +93,8 @@ public class DbHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(SQL_DROP_PRODUCT);
         sqLiteDatabase.execSQL(SQL_DROP_CATEGORY);
         sqLiteDatabase.execSQL(SQL_DROP_APPLICATION_STATE);
+        sqLiteDatabase.execSQL(SQL_DROP_TRANSACTION_HEADER);
+        sqLiteDatabase.execSQL(SQL_DROP_TRANSACTION_DETAIL);
         onCreate(sqLiteDatabase);
     }
 
@@ -151,12 +159,14 @@ public class DbHelper extends SQLiteOpenHelper {
 
     public long insertProduct(Product p) {
         SQLiteDatabase db = this.getWritableDatabase();
-
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date now = new Date();
         ContentValues values = new ContentValues();
         values.put(DbContract.ProductEntity.COL_ID, p.getId());
         values.put(DbContract.ProductEntity.COL_NAME, p.getName());
         values.put(DbContract.ProductEntity.COL_CATEGORY_ID, p.getCategory().getId());
         values.put(DbContract.ProductEntity.COL_PRICE, String.valueOf(p.getPrice()));
+        values.put(DbContract.ProductEntity.COL_DATE_CREATED, sdf.format(now));
 
         long id = db.insert(DbContract.ProductEntity.TABLE_NAME, null, values);
 

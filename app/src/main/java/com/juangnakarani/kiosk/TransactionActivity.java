@@ -216,8 +216,9 @@ public class TransactionActivity extends AppCompatActivity implements Runnable {
                 Snackbar.make(view, "Uang kembalian: " + changeAmount, Snackbar.LENGTH_INDEFINITE)
                         .setAction("Action", null).show();
                 //TODO move code bellow to function
-                Date currentTime = Calendar.getInstance().getTime();
-                TransactionHeader th = new TransactionHeader(currentTime.toString(), total, receivedAmount);
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date now = new Date();
+                TransactionHeader th = new TransactionHeader(sdf.format(now), total, receivedAmount);
                 long th_id = db.insertTransactionHeader(th);
 //                    Log.i("chk","insertTransactionHeader->" + th_id);
                 for (Product p : products) {
